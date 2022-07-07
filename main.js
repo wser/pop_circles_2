@@ -1,25 +1,26 @@
+import { button } from './button.js';
+
 const can = document.getElementById('can');
 const ctx = can.getContext('2d');
 
-let bubble = [];
 let pos = { x: 0, y: 0 };
 let buttonDown = false;
 
 function init() {
   resize();
 
-  can.addEventListener('mousedown', getRandomInt);
-  can.addEventListener('touchstart', getRandomInt);
+  can.addEventListener('mousedown', getRandomInt, false);
+  can.addEventListener('touchstart', getRandomInt, false);
 
-  window.addEventListener('resize', resize);
+  can.addEventListener('mousemove', drawLine, false);
+  can.addEventListener('mousedown', setPosition, false);
+  can.addEventListener('mouseup', released, false);
 
-  document.addEventListener('mousemove', drawLine);
-  document.addEventListener('mousedown', setPosition);
-  document.addEventListener('mouseup', released);
+  can.addEventListener('touchstart', setPosition, false);
+  can.addEventListener('touchmove', drawLine, false);
+  can.addEventListener('touchend', released, false);
 
-  document.addEventListener('touchstart', setPosition);
-  document.addEventListener('touchmove', drawLine);
-  document.addEventListener('touchend', released);
+  button(can, ctx, 'start', 40, 350, 350, 200, 100);
 }
 
 function getRandomInt() {
@@ -40,11 +41,6 @@ function setPosition(e) {
     pos.x = e.clientX;
     pos.y = e.clientY;
   }
-}
-
-function resize() {
-  ctx.canvas.width = window.innerWidth;
-  ctx.canvas.height = window.innerHeight;
 }
 
 function drawLine(e) {
@@ -71,4 +67,10 @@ function drawLine(e) {
   ctx.stroke();
 }
 
+function resize() {
+  ctx.canvas.width = window.innerWidth;
+  ctx.canvas.height = window.innerHeight;
+}
+
+window.addEventListener('resize', resize);
 window.addEventListener('load', init());
