@@ -49,9 +49,9 @@ function button(canvas, ctx, text, fontSize, x, y, w, h) {
   canvas.addEventListener(
     'click',
     function (evt) {
-      var mousePos = getMousePos(canvas, evt);
-      if (isInside(mousePos, rect)) alert('clicked inside rect');
-      else alert('clicked outside rect');
+      isInside(getMousePos(canvas, evt), rect)
+        ? alert('clicked inside rect')
+        : alert('clicked outside rect');
     },
     false
   );

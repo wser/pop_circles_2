@@ -20,7 +20,16 @@ function init() {
   can.addEventListener('touchmove', drawLine, false);
   can.addEventListener('touchend', released, false);
 
-  button(can, ctx, 'start', 40, 350, 350, 200, 100);
+  button(
+    can,
+    ctx,
+    'start',
+    40,
+    ctx.canvas.width / 2 - 100,
+    ctx.canvas.height / 2 - 50,
+    200,
+    100
+  );
 }
 
 function getRandomInt() {
@@ -72,5 +81,5 @@ function resize() {
   ctx.canvas.height = window.innerHeight;
 }
 
-window.addEventListener('resize', resize);
+window.addEventListener('resize', resize());
 window.addEventListener('load', init());
