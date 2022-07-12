@@ -42,16 +42,14 @@ function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
   }
 }
 
-function button(canvas, ctx, text, fontSize, x, y, w, h) {
+function button(canvas, ctx, text, fontSize, x, y, w, h, clbck) {
   //The rectangle should have x,y,width,height properties
   var rect = { x, y, w, h };
   //Binding the click event on the canvas
   canvas.addEventListener(
     'click',
-    function (evt) {
-      isInside(getMousePos(canvas, evt), rect)
-        ? alert('clicked inside rect')
-        : alert('clicked outside rect');
+    (evt) => {
+      if (isInside(getMousePos(canvas, evt), rect)) clbck();
     },
     false
   );
