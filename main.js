@@ -267,139 +267,24 @@
 // }
 ////////////////////////////////////////////////
 ////////////////////////////////////////////////
-// var canvas = document.getElementById('can');
-// var context = canvas.getContext('2d');
-// var circles = []; // An empty array to hold our circles
-// let pos = { x: 0, y: 0 };
 
-// add click handler
-//canvas.onclick = act(e);
-// canvas.addEventListener(
-//   'click',
-//   (e) => {
-//     pos = getMousePos(canvas, e);
-//     addCircle(pos.x, pos.y);
-//   },
-//   false
-// );
-
-// canvas.addEventListener('tap', function (e) {
-//   pos = getMousePos(canvas, e);
-//   addCircle(pos.x, pos.y);
-// });
-
-// function act(e) {
-//   pos = getMousePos(canvas, e);
-//   addCircle(pos.x, pos.y);
-// }
-
-// function addCircle(mouse_x, mouse_y) {
-//   // First, we check if there is any intersection with existing circles
-//   for (var i = circles.length - 1; i > 0; i--) {
-//     var circle = circles[i],
-//       distance = getDistance(circle.x, circle.y, mouse_x, mouse_y);
-
-//     // If distance is less than radius times two, then we know its a collision
-//     if (distance < 60) {
-//       circles.splice(i, 1); // Remove the element from array
-//     }
-//   }
-
-//   // Second, we push the new circle in the array
-//   circles.push({
-//     x: mouse_x,
-//     y: mouse_y,
-//     color: randomColor(),
-//   });
-
-//   // Third, we draw based on what circles we have in the array
-//   drawCircles();
-// }
-
-// function drawCircles() {
-//   // We'll have to clear the canvas as it has deleted circles as well
-//   context.clearRect(0, 0, canvas.width, canvas.height);
-
-//   for (var i = circles.length - 1; i > 0; i--) {
-//     var circle = circles[i];
-
-//     context.fillStyle = circle.color;
-//     context.beginPath();
-//     context.arc(circle.x, circle.y, 30, 0, 2 * Math.PI);
-//     context.fill();
-//   }
-// }
-
-// // Function to get distance between two points
-// function getDistance(x1, y1, x2, y2) {
-//   // Distance formula
-//   return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
-// }
-
-// function randomColor() {
-//   var color = [];
-//   for (var i = 0; i < 3; i++) {
-//     color.push(Math.floor(Math.random() * 256));
-//   }
-//   return 'rgb(' + color.join(',') + ')';
-// }
-
-// function getMousePos(canvas, evt) {
-//   var rect = canvas.getBoundingClientRect();
-//   return {
-//     x: evt.clientX - rect.left,
-//     y: evt.clientY - rect.top,
-//   };
-// }
-
-///////////////////////////////////////////////////
-///////////////////////////////////////////////////
-
-// // Get the canvas and 2d context
-// var canvas = document.getElementById('can'),
-//   ctx = canvas.getContext('2d');
-// ctx.fillStyle = 'black';
-// ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-// var drawCircle = function (ctx, x, y, r, style) {
-//   ctx.strokeStyle = style || 'red';
-//   ctx.beginPath();
-//   ctx.arc(x, y, r, 0, Math.PI * 2);
-//   ctx.stroke();
-// };
-// // pointer down event that will work with Touch AND Mouse events
-// var pointerDown = function (e) {
-//   e.preventDefault();
-//   var bx = e.target.getBoundingClientRect(),
-//     // assuming mouse to begin with
-//     x = e.clientX,
-//     y = e.clientY,
-//     color = 'lime';
-//   // checking for touch
-//   if (e.changedTouches) {
-//     (x = e.changedTouches[0].clientX), (y = e.changedTouches[0].clientY);
-//     color = 'red';
-//   }
-//   // adjust to make values relative to target element
-//   // to which this hander is attached to rather than window
-//   x -= bx.left;
-//   y -= bx.top;
-//   drawCircle(ctx, x, y, 15, color);
-// };
-
-// canvas.addEventListener('touchstart', pointerDown);
-// canvas.addEventListener('mousedown', pointerDown);
-///////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////
+/**
+ * TODO: classes
+ *  GameFrame
+ *  InputHandler
+ *  Circle
+ */
 // Get the canvas and 2d context
 var canvas = document.getElementById('can'),
   ctx = canvas.getContext('2d'),
+  circles = [], // An empty array to hold our circles
   buttonDown = false;
 
-function resize() {
-  ctx.canvas.width = window.innerWidth - 20;
-  ctx.canvas.height = window.innerHeight - 20;
-}
+var pts = { x: 0, y: 0 };
+
+let init = () => {
+  cls();
+};
 
 // clear
 var cls = function () {
@@ -410,13 +295,17 @@ var cls = function () {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 };
 
-var pts = { x: 0, y: 0 };
+var resize = function () {
+  ctx.canvas.width = window.innerWidth - 20;
+  ctx.canvas.height = window.innerHeight - 20;
+};
 
 var handleTap = function (e) {
   pointerAdjust(e);
   let color;
   e.changedTouches ? (color = 'red') : (color = 'blue');
-  drawCircle(ctx, pts.x, pts.y, 15, color);
+  //drawCircle(ctx, pts.x, pts.y, 15, color);
+  addCircle(pts.x, pts.y);
 };
 
 var drawCircle = function (ctx, x, y, r, style) {
@@ -425,6 +314,62 @@ var drawCircle = function (ctx, x, y, r, style) {
   ctx.arc(x, y, r, 0, Math.PI * 2);
   ctx.stroke();
 };
+
+function addCircle(mouse_x, mouse_y) {
+  // First, we check if there is any intersection with existing circles
+  for (var i = circles.length - 1; i > 0; i--) {
+    var circle = circles[i],
+      distance = getDistance(circle.x, circle.y, mouse_x, mouse_y);
+
+    // If distance is less than radius times two, then we know its a collision
+    if (distance < 30) {
+      circles.splice(i, 1); // Remove the element from array
+    }
+  }
+
+  // Second, we push the new circle in the array
+  circles.push({
+    x: mouse_x,
+    y: mouse_y,
+    color: randomColor(),
+  });
+
+  // Third, we draw based on what circles we have in the array
+  drawCircles();
+}
+
+function drawCircles() {
+  // We'll have to clear the canvas as it has deleted circles as well
+  //ctx.clearRect(0, 0, canvas.width, canvas.height);
+  cls();
+
+  for (var i = circles.length - 1; i > 0; i--) {
+    var circle = circles[i];
+
+    ctx.fillStyle = circle.color;
+    ctx.beginPath();
+    ctx.arc(circle.x, circle.y, 15, 0, 2 * Math.PI);
+    ctx.fill();
+  }
+}
+
+// Function to get distance between two points
+function getDistance(x1, y1, x2, y2) {
+  // Distance formula
+  return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+}
+
+function randomColor() {
+  var color = [];
+  for (var i = 0; i < 3; i++) {
+    color.push(Math.floor(Math.random() * 256));
+  }
+  return 'rgb(' + color.join(',') + ')';
+}
+
+/**
+ * tap events
+ */
 
 var pointerAdjust = function (e) {
   e.preventDefault();
@@ -473,4 +418,4 @@ canvas.addEventListener('mousedown', tapStart, false);
 canvas.addEventListener('mousemove', tapMove, false);
 canvas.addEventListener('mouseup', tapEnd, false);
 
-canvas.addEventListener('resize', resize());
+canvas.addEventListener('load', init());
