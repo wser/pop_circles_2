@@ -397,48 +397,27 @@ var canvas = document.getElementById('can'),
   buttonDown = false;
 
 function resize() {
-  ctx.canvas.width = window.innerWidth;
-  ctx.canvas.height = window.innerHeight;
-}
-
-function is_touch_enabled() {
-  return (
-    'ontouchstart' in window ||
-    navigator.maxTouchPoints > 0 ||
-    navigator.msMaxTouchPoints > 0
-  );
+  ctx.canvas.width = window.innerWidth - 20;
+  ctx.canvas.height = window.innerHeight - 20;
 }
 
 // clear
 var cls = function () {
   resize();
   // fill black
-  //ctx.fillStyle = 'black';
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  //ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = 'lightgray';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 };
 
-var pts = {
-  x: 0,
-  y: 0,
-};
+var pts = { x: 0, y: 0 };
 
-var getInitPoints = function (e) {
-  if (e.type == 'touchstart' || e.type == 'mousedown') {
-    pts.x = e.touches[0].clientX;
-    pts.y = e.touches[0].clientY;
-  } else {
-    pts.x = e.clientX;
-    pts.y = e.clientY;
-  }
+var handleTap = function (e) {
+  pointerAdjust(e);
+  let color;
+  e.changedTouches ? (color = 'red') : (color = 'blue');
+  drawCircle(ctx, pts.x, pts.y, 15, color);
 };
-
-// var circle = function (e) {
-//   var f = getInitPoints(e);
-//   e.preventDefault();
-//   ctx.beginPath();
-//   ctx.arc(f.x, f.y, 15, 0, Math.PI * 2);
-//   ctx.stroke();
-// };
 
 var drawCircle = function (ctx, x, y, r, style) {
   ctx.strokeStyle = style || 'red';
@@ -450,35 +429,33 @@ var drawCircle = function (ctx, x, y, r, style) {
 var pointerAdjust = function (e) {
   e.preventDefault();
   var bx = e.target.getBoundingClientRect();
-  //assuming mouse to begin with
-  pts.x = e.clientX;
-  pts.y = e.clientY;
-  var color = 'lime';
+
   // checking for touch
   if (e.changedTouches) {
     pts.x = e.changedTouches[0].clientX;
     pts.y = e.changedTouches[0].clientY;
-    color = 'red';
+  } else {
+    //assuming mouse
+    pts.x = e.clientX;
+    pts.y = e.clientY;
   }
   // adjust to make values relative to target element
-  // to which this hander is attached to rather than window
+  // to which this handler is attached to rather than window
   pts.x -= bx.left;
   pts.y -= bx.top;
-  return drawCircle(ctx, pts.x, pts.y, 15, color);
 };
 
 var tapStart = function (e) {
+  cls();
   buttonDown = true;
   e.preventDefault();
-
-  cls();
-  pointerAdjust(e);
+  handleTap(e);
 };
 
 var tapMove = function (e) {
   if (buttonDown) {
     e.preventDefault();
-    pointerAdjust(e);
+    handleTap(e);
   }
 };
 
@@ -496,4 +473,4 @@ canvas.addEventListener('mousedown', tapStart, false);
 canvas.addEventListener('mousemove', tapMove, false);
 canvas.addEventListener('mouseup', tapEnd, false);
 
-cls();
+canvas.addEventListener('resize', resize());
