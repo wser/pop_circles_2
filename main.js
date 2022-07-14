@@ -48,8 +48,6 @@
 //     circleSize += diameter; // increase speed of circle diameter growth
 //   }
 
-//   showScoreText(); // display current score results in front of circles
-
 //   for (const c of circles) c.init(); // draw all circles in the array of circles
 
 //   if (end) {
@@ -131,70 +129,6 @@
 //   handleMouseAndTouch();
 // }
 
-// function showScoreText() {
-//   ctx.font = '12px Arial';
-
-//   ctx.fillText(
-//     'Total pixels: ' + numberWithDots(Math.round(totalPixl)) + ' pixels',
-//     20,
-//     20
-//   );
-//   ctx.fillText(
-//     'Colored area: ' +
-//       numberWithDots(Math.round(totalArea)) +
-//       ' pixels || ' +
-//       perct +
-//       '%',
-//     20,
-//     40
-//   );
-//   ctx.fillText('Circles : ' + circles.length, 20, 60);
-// }
-
-// function endText() {
-//   ctx.font = '14px Arial';
-
-//   ctx.fillText(
-//     'FINAL SCORE: ' + numberWithDots(Math.round(totalArea)) + ' pixels',
-//     can.width / 2,
-//     can.height / 2 - 40
-//   );
-
-//   ctx.fillText(
-//     'TOTAL NUMBER OF CREATED CIRCLES: ' + circles.length,
-//     can.width / 2,
-//     can.height / 2 + 20
-//   );
-
-//   ctx.font = '36px Arial';
-//   ctx.fillText('YOU ARE: ' + getAwardLvl(), can.width / 2, can.height / 2);
-
-//   ctx.strokeStyle = `rgb(255, 204, 0)`;
-//   ctx.lineWidth = 4;
-//   ctx.stroke();
-// }
-
-// function getAwardLvl() {
-//   // prettier-ignore
-//   const awards = [
-//     'begginer','junior','amateur','professional','senior','expert','...you rule','amazing','insane','unbelievable','worship',
-//   ];
-//   let level = 0;
-//   // add calculation for award
-//   if (circles.length > 2 || totalArea > 5000) level = 1;
-//   if (circles.length > 2 || totalArea > 10000) level = 2;
-//   if (circles.length > 3 || totalArea > 50000) level = 3;
-//   if (circles.length > 4 || totalArea > 100000) level = 4;
-//   if (circles.length > 5 || totalArea > 500000) level = 5;
-//   if (circles.length > 6 || totalArea > 1000000) level = 6;
-//   if (circles.length > 7 || totalArea > 2000000) level = 7;
-//   if (circles.length > 8 || totalArea > 3000000) level = 8;
-//   if (circles.length > 9 || totalArea > 4000000) level = 9;
-//   if (circles.length > 10 || totalArea > 5000000) level = 10;
-
-//   return awards[level].toUpperCase();
-// }
-
 // function endConditions() {
 //   const overlappingCircle = getOverlappingCircle();
 //   if (overlappingCircle) {
@@ -246,10 +180,6 @@
 //   perct = ((totalArea / totalPixl) * 100).toFixed(2);
 // }
 
-// function numberWithDots(x) {
-//   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-// }
-
 // class Circle {
 //   constructor(x, y, size, color) {
 //     this.x = x;
@@ -278,13 +208,15 @@
 var canvas = document.getElementById('can'),
   ctx = canvas.getContext('2d'),
   circles = [], // An empty array to hold our circles
-  buttonDown = false;
+  buttonDown = false,
+  diameter = 1,
+  totalPixl = 0,
+  totalArea = 0,
+  perct = 0;
 
-var pts = { x: 0, y: 0 };
-
-let init = () => {
-  cls();
-};
+let pts = { x: 0, y: 0 };
+let init = () => cls();
+let numberWithDots = (x) => x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 
 // clear
 var cls = function () {
@@ -306,6 +238,7 @@ var handleTap = function (e) {
   e.changedTouches ? (color = 'red') : (color = 'blue');
   //drawCircle(ctx, pts.x, pts.y, 15, color);
   addCircle(pts.x, pts.y);
+  showScoreText(); // display current score results in front of circles
 };
 
 var drawCircle = function (ctx, x, y, r, style) {
@@ -322,9 +255,7 @@ function addCircle(mouse_x, mouse_y) {
       distance = getDistance(circle.x, circle.y, mouse_x, mouse_y);
 
     // If distance is less than radius times two, then we know its a collision
-    if (distance < 30) {
-      circles.splice(i, 1); // Remove the element from array
-    }
+    if (distance < 30) circles.splice(i, 1); // Remove the element from array
   }
 
   // Second, we push the new circle in the array
@@ -419,3 +350,64 @@ canvas.addEventListener('mousemove', tapMove, false);
 canvas.addEventListener('mouseup', tapEnd, false);
 
 canvas.addEventListener('load', init());
+
+// function getAwardLvl() {
+//   // prettier-ignore
+//   const awards = [
+//     'begginer','junior','amateur','professional','senior','expert','...you rule','amazing','insane','unbelievable','worship',
+//   ];
+//   let level = 0;
+//   // add calculation for award
+//   if (circles.length > 2 || totalArea > 5000) level = 1;
+//   if (circles.length > 2 || totalArea > 10000) level = 2;
+//   if (circles.length > 3 || totalArea > 50000) level = 3;
+//   if (circles.length > 4 || totalArea > 100000) level = 4;
+//   if (circles.length > 5 || totalArea > 500000) level = 5;
+//   if (circles.length > 6 || totalArea > 1000000) level = 6;
+//   if (circles.length > 7 || totalArea > 2000000) level = 7;
+//   if (circles.length > 8 || totalArea > 3000000) level = 8;
+//   if (circles.length > 9 || totalArea > 4000000) level = 9;
+//   if (circles.length > 10 || totalArea > 5000000) level = 10;
+
+//   return awards[level].toUpperCase();
+// }
+
+function showScoreText() {
+  ctx.font = '12px Arial';
+  ctx.fillStyle = 'red';
+  // prettier-ignore
+  ctx.fillText(
+    'Total pixels: ' + numberWithDots(Math.round(totalPixl)) + ' pixels', 20, 20
+  );
+  // prettier-ignore
+  ctx.fillText(
+    'Colored area: ' +
+      numberWithDots(Math.round(totalArea)) + ' pixels || ' + perct + '%',
+    20, 40
+  );
+  let amount = circles.length ? circles.length - 1 : 1;
+  ctx.fillText('Circles : ' + amount, 20, 60);
+}
+
+// function endText() {
+//   ctx.font = '14px Arial';
+
+//   ctx.fillText(
+//     'FINAL SCORE: ' + numberWithDots(Math.round(totalArea)) + ' pixels',
+//     can.width / 2,
+//     can.height / 2 - 40
+//   );
+
+//   ctx.fillText(
+//     'TOTAL NUMBER OF CREATED CIRCLES: ' + circles.length,
+//     can.width / 2,
+//     can.height / 2 + 20
+//   );
+
+//   ctx.font = '36px Arial';
+//   ctx.fillText('YOU ARE: ' + getAwardLvl(), can.width / 2, can.height / 2);
+
+//   ctx.strokeStyle = `rgb(255, 204, 0)`;
+//   ctx.lineWidth = 4;
+//   ctx.stroke();
+// }
