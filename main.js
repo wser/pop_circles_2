@@ -209,43 +209,36 @@ var canvas = document.getElementById('can'),
   ctx = canvas.getContext('2d'),
   circles = [], // An empty array to hold our circles
   buttonDown = false,
-  diameter = 1,
   totalPixl = 0,
   totalArea = 0,
-  perct = 0;
+  perct = 0,
+  radius = 15;
 
 let pts = { x: 0, y: 0 };
 let init = () => cls();
 let numberWithDots = (x) => x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-
-// clear
-var cls = function () {
-  resize();
-  // fill black
-  //ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = 'lightgray';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-};
-
-var resize = function () {
+let getDistance = (x1, y1, x2, y2) => Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2); // Distance formula
+// let randomColor = () => '#' + (((1 << 24) * Math.random()) | 0).toString(16);
+let randomColor = () => '#' + Math.floor(Math.random() * 16777215).toString(16);
+let resize = () => {
   ctx.canvas.width = window.innerWidth - 20;
   ctx.canvas.height = window.innerHeight - 20;
 };
 
-var handleTap = function (e) {
-  pointerAdjust(e);
-  let color;
-  e.changedTouches ? (color = 'red') : (color = 'blue');
-  //drawCircle(ctx, pts.x, pts.y, 15, color);
-  addCircle(pts.x, pts.y);
-  showScoreText(); // display current score results in front of circles
+// clear
+let cls = function () {
+  resize();
+  //ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = 'lightgray'; // fill canvas with color
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 };
 
-var drawCircle = function (ctx, x, y, r, style) {
-  ctx.strokeStyle = style || 'red';
-  ctx.beginPath();
-  ctx.arc(x, y, r, 0, Math.PI * 2);
-  ctx.stroke();
+var handleTap = function (e) {
+  pointerAdjust(e);
+  //let color;
+  //e.changedTouches ? (color = 'red') : (color = 'blue');
+  addCircle(pts.x, pts.y);
+  showScoreText(); // display current score results in front of circles
 };
 
 function addCircle(mouse_x, mouse_y) {
@@ -255,7 +248,7 @@ function addCircle(mouse_x, mouse_y) {
       distance = getDistance(circle.x, circle.y, mouse_x, mouse_y);
 
     // If distance is less than radius times two, then we know its a collision
-    if (distance < 30) circles.splice(i, 1); // Remove the element from array
+    if (distance < radius * 2) circles.splice(i, 1); // Remove the element from array
   }
 
   // Second, we push the new circle in the array
@@ -275,28 +268,88 @@ function drawCircles() {
   cls();
 
   for (var i = circles.length - 1; i > 0; i--) {
+    radius = 0;
     var circle = circles[i];
 
     ctx.fillStyle = circle.color;
     ctx.beginPath();
-    ctx.arc(circle.x, circle.y, 15, 0, 2 * Math.PI);
+
+    if (buttonDown) radius += 10;
+    ctx.arc(circle.x, circle.y, radius, 0, 2 * Math.PI);
     ctx.fill();
   }
 }
 
-// Function to get distance between two points
-function getDistance(x1, y1, x2, y2) {
-  // Distance formula
-  return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+function growCircle(r) {
+  r = radius;
 }
 
-function randomColor() {
-  var color = [];
-  for (var i = 0; i < 3; i++) {
-    color.push(Math.floor(Math.random() * 256));
-  }
-  return 'rgb(' + color.join(',') + ')';
+/**
+ * award area
+ */
+// function getAwardLvl() {
+//   // prettier-ignore
+//   const awards = [
+//     'begginer','junior','amateur','professional','senior','expert','...you rule','amazing','insane','unbelievable','worship',
+//   ];
+//   let level = 0;
+//   // add calculation for award
+//   if (circles.length > 2 || totalArea > 5000) level = 1;
+//   if (circles.length > 2 || totalArea > 10000) level = 2;
+//   if (circles.length > 3 || totalArea > 50000) level = 3;
+//   if (circles.length > 4 || totalArea > 100000) level = 4;
+//   if (circles.length > 5 || totalArea > 500000) level = 5;
+//   if (circles.length > 6 || totalArea > 1000000) level = 6;
+//   if (circles.length > 7 || totalArea > 2000000) level = 7;
+//   if (circles.length > 8 || totalArea > 3000000) level = 8;
+//   if (circles.length > 9 || totalArea > 4000000) level = 9;
+//   if (circles.length > 10 || totalArea > 5000000) level = 10;
+
+//   return awards[level].toUpperCase();
+// }
+
+/**
+ * Text functions
+ */
+function showScoreText() {
+  ctx.font = '12px Arial';
+  ctx.fillStyle = 'red';
+  // prettier-ignore
+  ctx.fillText(
+    'Total pixels: ' + numberWithDots(Math.round(totalPixl)) + ' pixels', 20, 20
+  );
+  // prettier-ignore
+  ctx.fillText(
+    'Colored area: ' +
+      numberWithDots(Math.round(totalArea)) + ' pixels || ' + perct + '%',
+    20, 40
+  );
+  let amount = circles.length ? circles.length - 1 : 1;
+  ctx.fillText('Circles : ' + amount, 20, 60);
 }
+
+// function endText() {
+//   ctx.font = '14px Arial';
+
+//   ctx.fillText(
+//     'FINAL SCORE: ' + numberWithDots(Math.round(totalArea)) + ' pixels',
+//     can.width / 2,
+//     can.height / 2 - 40
+//   );
+
+//   ctx.fillText(
+//     'TOTAL NUMBER OF CREATED CIRCLES: ' + circles.length,
+//     can.width / 2,
+//     can.height / 2 + 20
+//   );
+
+//   ctx.font = '36px Arial';
+//   ctx.fillText('YOU ARE: ' + getAwardLvl(), can.width / 2, can.height / 2);
+
+//   ctx.strokeStyle = `rgb(255, 204, 0)`;
+//   ctx.lineWidth = 4;
+//   ctx.stroke();
+// }
 
 /**
  * tap events
@@ -340,7 +393,9 @@ var tapEnd = function (e) {
   buttonDown = false;
 };
 
-// attach a touch events
+/**
+ * attach events to canvas
+ */
 canvas.addEventListener('touchstart', tapStart, false);
 canvas.addEventListener('touchmove', tapMove, false);
 canvas.addEventListener('touchend', tapEnd, false);
@@ -350,64 +405,3 @@ canvas.addEventListener('mousemove', tapMove, false);
 canvas.addEventListener('mouseup', tapEnd, false);
 
 canvas.addEventListener('load', init());
-
-// function getAwardLvl() {
-//   // prettier-ignore
-//   const awards = [
-//     'begginer','junior','amateur','professional','senior','expert','...you rule','amazing','insane','unbelievable','worship',
-//   ];
-//   let level = 0;
-//   // add calculation for award
-//   if (circles.length > 2 || totalArea > 5000) level = 1;
-//   if (circles.length > 2 || totalArea > 10000) level = 2;
-//   if (circles.length > 3 || totalArea > 50000) level = 3;
-//   if (circles.length > 4 || totalArea > 100000) level = 4;
-//   if (circles.length > 5 || totalArea > 500000) level = 5;
-//   if (circles.length > 6 || totalArea > 1000000) level = 6;
-//   if (circles.length > 7 || totalArea > 2000000) level = 7;
-//   if (circles.length > 8 || totalArea > 3000000) level = 8;
-//   if (circles.length > 9 || totalArea > 4000000) level = 9;
-//   if (circles.length > 10 || totalArea > 5000000) level = 10;
-
-//   return awards[level].toUpperCase();
-// }
-
-function showScoreText() {
-  ctx.font = '12px Arial';
-  ctx.fillStyle = 'red';
-  // prettier-ignore
-  ctx.fillText(
-    'Total pixels: ' + numberWithDots(Math.round(totalPixl)) + ' pixels', 20, 20
-  );
-  // prettier-ignore
-  ctx.fillText(
-    'Colored area: ' +
-      numberWithDots(Math.round(totalArea)) + ' pixels || ' + perct + '%',
-    20, 40
-  );
-  let amount = circles.length ? circles.length - 1 : 1;
-  ctx.fillText('Circles : ' + amount, 20, 60);
-}
-
-// function endText() {
-//   ctx.font = '14px Arial';
-
-//   ctx.fillText(
-//     'FINAL SCORE: ' + numberWithDots(Math.round(totalArea)) + ' pixels',
-//     can.width / 2,
-//     can.height / 2 - 40
-//   );
-
-//   ctx.fillText(
-//     'TOTAL NUMBER OF CREATED CIRCLES: ' + circles.length,
-//     can.width / 2,
-//     can.height / 2 + 20
-//   );
-
-//   ctx.font = '36px Arial';
-//   ctx.fillText('YOU ARE: ' + getAwardLvl(), can.width / 2, can.height / 2);
-
-//   ctx.strokeStyle = `rgb(255, 204, 0)`;
-//   ctx.lineWidth = 4;
-//   ctx.stroke();
-// }
