@@ -28,16 +28,6 @@
 //   restartButton = button(can, ctx, 'start', 40, ctx.canvas.width / 2 - 100, ctx.canvas.height / 2 - 50, 200, 100, evt);
 //   restartButton.hide();
 
-//   can.addEventListener('mousedown', setPosition, false);
-//   can.addEventListener('mousedown', handleMouseAndTouch, false);
-//   //can.addEventListener('mousemove', drawLine, false);
-//   can.addEventListener('mouseup', released, false);
-
-//   can.addEventListener('touchstart', setPosition, false);
-//   can.addEventListener('touchstart', handleMouseAndTouch, false);
-//   //can.addEventListener('touchmove', drawLine, false);
-//   can.addEventListener('touchend', released, false);
-
 //   if (circleFilling && !end) {
 //     endConditions(); // check if end condition exists
 
@@ -56,148 +46,6 @@
 //   }
 // }
 
-// function getRandomInt() {
-//   return Math.floor(Math.random() * Math.floor(3));
-// }
-
-// function released(e) {
-//   buttonDown = false;
-// }
-
-// function setPosition(e) {
-//   if (e.type == 'touchstart' || e.type == 'mousedown') buttonDown = true;
-
-//   if (e.type == 'touchstart' || e.type == 'touchmove') {
-//     pos.x = e.touches[0].clientX;
-//     mouseX = pos.x;
-//     pos.y = e.touches[0].clientY;
-//     mouseY = pos.y;
-//   } else {
-//     mouseX = pos.x = e.clientX;
-//     mouseX = pos.x;
-//     mouseY = pos.y = e.clientY;
-//     mouseY = pos.y;
-//   }
-// }
-
-// function resize() {
-//   ctx.canvas.width = window.innerWidth;
-//   ctx.canvas.height = window.innerHeight;
-// }
-
-// window.addEventListener('resize', resize());
-// window.addEventListener('load', init());
-
-// /////////////////////////////
-// /* custom functions*/
-
-// function handleMouseAndTouch() {
-//   let rnd = getRandomInt();
-
-//   let colory;
-//   // prettier-ignore
-//   switch (rnd) {
-//     case 1: colory = 'green'; break;
-//     case 2: colory = 'red';   break;
-//     case 0: colory = 'blue';  break;
-//   }
-
-//   onEnd();
-
-//   circleSize = 0; // initial circle size
-//   circleColor = colory; //(random(255), random(255), random(255)); // set that circle random color to fill with
-//   circleFilling = true; // start to fill circle
-//   touchstarted = true;
-//   touchended = false;
-//   return false;
-// }
-
-// function restart() {
-//   end = false; // set to not end
-//   circles.length = 0; // reset array
-//   totalArea = 0; //reset global counter
-//   perct = 0;
-//   circleSize = 0;
-//   totalPixl = window.innerWidth * window.innerHeight;
-
-//   if (!buttonDown) return;
-
-//   ctx.clearRect(0, 0, can.width, can.height); // redraw can / clear all
-
-//   ctx.stroke(); // line thickness of circle
-
-//   handleMouseAndTouch();
-// }
-
-// function endConditions() {
-//   const overlappingCircle = getOverlappingCircle();
-//   if (overlappingCircle) {
-//     circleFilling = false; // stop filling if circles collide
-//     circles.splice(circles.indexOf(overlappingCircle), 1); // remove active circle and touched one
-//     end = true;
-//   }
-
-//   if (isOffCanvas()) {
-//     circleFilling = false; // stop drawing if is offscreen
-//     end = true;
-//   }
-// }
-
-// function getOverlappingCircle() {
-//   for (const c of circles)
-//     if (dist(c.x, c.y, mouseX, mouseY) < circleSize * 0.5 + c.size * 0.5 + 2)
-//       return c;
-
-//   return undefined;
-// }
-
-// function isOffCanvas() {
-//   return (
-//     mouseX < circleSize / 2 ||
-//     mouseX > width - circleSize / 2 ||
-//     mouseY < circleSize / 2 ||
-//     mouseY > height - circleSize / 2
-//   );
-// }
-
-// function onEnd() {
-//   if (circleFilling && !end) {
-//     circles.push(new Circle(mouseX, mouseY, circleSize, circleColor)); // if not touched, add to an array
-//   }
-//   circleFilling = false; // stop filling the circle
-
-//   calcArea(); // calculate coloured area
-//   return false;
-// }
-
-// function calcArea() {
-//   totalArea = 0;
-//   for (const c of circles) {
-//     circleArea = (c.size * 0.5) ** 2 * Math.PI; // area of a every circle r2*pi
-//     totalArea += circleArea;
-//   }
-
-//   perct = ((totalArea / totalPixl) * 100).toFixed(2);
-// }
-
-// class Circle {
-//   constructor(x, y, size, color) {
-//     this.x = x;
-//     this.y = y;
-//     this.size = size;
-//     this.color = color;
-//   }
-
-//   draw() {
-//     fill(this.color);
-//     circle(this.x, this.y, this.size);
-//     //ellipse(this.x, this.y, this.size, this.size);
-//     if (end) this.color.setAlpha(128 + 128 * sin(millis() / 500));
-//   }
-// }
-////////////////////////////////////////////////
-////////////////////////////////////////////////
-
 /**
  * TODO: classes
  *  GameFrame
@@ -209,17 +57,42 @@ var canvas = document.getElementById('can'),
   ctx = canvas.getContext('2d'),
   circles = [], // An empty array to hold our circles
   buttonDown = false,
+  circleSize = 10,
+  circleArea = 0,
   totalPixl = 0,
   totalArea = 0,
-  perct = 0,
-  radius = 15;
+  perct = 0;
+
+let mouseX, mouseY, circleColor, raf;
+
+var ball = {
+  x: 0,
+  y: 0,
+  r: 0,
+  color: 'blue',
+  draw: function () {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, true);
+    ctx.closePath();
+    ctx.fillStyle = this.color;
+    ctx.fill();
+  },
+};
+
+function draw() {
+  cls();
+  ball.draw();
+  ball.r += 10;
+  raf = window.requestAnimationFrame(draw);
+}
 
 let pts = { x: 0, y: 0 };
-let init = () => cls();
+let init = () => {
+  cls();
+};
 let numberWithDots = (x) => x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 let getDistance = (x1, y1, x2, y2) => Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2); // Distance formula
-// let randomColor = () => '#' + (((1 << 24) * Math.random()) | 0).toString(16);
-let randomColor = () => '#' + Math.floor(Math.random() * 16777215).toString(16);
+let randomColor = () => '#' + ((Math.random() * (1 << 24)) | 0).toString(16);
 let resize = () => {
   ctx.canvas.width = window.innerWidth - 20;
   ctx.canvas.height = window.innerHeight - 20;
@@ -237,29 +110,37 @@ var handleTap = function (e) {
   pointerAdjust(e);
   //let color;
   //e.changedTouches ? (color = 'red') : (color = 'blue');
+
+  if (!buttonDown) {
+    raf = window.requestAnimationFrame(draw);
+    buttonDown = true;
+  }
+
   addCircle(pts.x, pts.y);
   showScoreText(); // display current score results in front of circles
 };
 
 function addCircle(mouse_x, mouse_y) {
-  // First, we check if there is any intersection with existing circles
+  mouseX = mouse_x;
+  mouseY = mouse_y;
+  circleColor = randomColor();
+
+  // check if there is any intersection with existing circles
   for (var i = circles.length - 1; i > 0; i--) {
     var circle = circles[i],
       distance = getDistance(circle.x, circle.y, mouse_x, mouse_y);
 
-    // If distance is less than radius times two, then we know its a collision
-    if (distance < radius * 2) circles.splice(i, 1); // Remove the element from array
+    // if distance is less than radius times two, then we know its a collision
+    if (distance < circleSize * 2) circles.splice(i, 1); // Remove the element from array
   }
 
-  // Second, we push the new circle in the array
-  circles.push({
-    x: mouse_x,
-    y: mouse_y,
-    color: randomColor(),
-  });
+  // push the new circle in the array
+  // prettier-ignore
+  circles.push(new Circle(mouseX, mouseY, circleSize, circleColor));
 
-  // Third, we draw based on what circles we have in the array
+  // draw based on what circles we have in the array
   drawCircles();
+  circleSize = 10;
 }
 
 function drawCircles() {
@@ -268,20 +149,15 @@ function drawCircles() {
   cls();
 
   for (var i = circles.length - 1; i > 0; i--) {
-    radius = 0;
     var circle = circles[i];
 
     ctx.fillStyle = circle.color;
     ctx.beginPath();
 
-    if (buttonDown) radius += 10;
-    ctx.arc(circle.x, circle.y, radius, 0, 2 * Math.PI);
+    ctx.arc(circle.x, circle.y, circle.size, 0, 7);
+
     ctx.fill();
   }
-}
-
-function growCircle(r) {
-  r = radius;
 }
 
 /**
@@ -359,7 +235,7 @@ var pointerAdjust = function (e) {
   e.preventDefault();
   var bx = e.target.getBoundingClientRect();
 
-  // checking for touch
+  // checking for touch // not work on IE or Safari
   if (e.changedTouches) {
     pts.x = e.changedTouches[0].clientX;
     pts.y = e.changedTouches[0].clientY;
@@ -405,3 +281,95 @@ canvas.addEventListener('mousemove', tapMove, false);
 canvas.addEventListener('mouseup', tapEnd, false);
 
 canvas.addEventListener('load', init());
+
+// function handleMouseAndTouch() {
+//   let rnd = Math.floor(Math.random() * Math.floor(3));
+
+//   let colory;
+//   // prettier-ignore
+//   switch (rnd) {
+//     case 1: colory = 'green'; break;
+//     case 2: colory = 'red';   break;
+//     case 0: colory = 'blue';  break;
+//   }
+
+//   onEnd();
+
+//   circleSize = 0; // initial circle size
+//   circleColor = colory; //(random(255), random(255), random(255)); // set that circle random color to fill with
+//   circleFilling = true; // start to fill circle
+//   touchstarted = true;
+//   touchended = false;
+//   return false;
+// }
+
+// function restart() {
+//   end = false; // set to not end
+//   circles.length = 0; // reset array
+//   totalArea = 0; //reset global counter
+//   perct = 0;
+//   circleSize = 0;
+//   totalPixl = window.innerWidth * window.innerHeight;
+
+//   if (!buttonDown) return;
+
+//   ctx.clearRect(0, 0, can.width, can.height); // redraw can / clear all
+
+//   ctx.stroke(); // line thickness of circle
+
+//   handleMouseAndTouch();
+// }
+
+// function endConditions() {
+//   const overlappingCircle = getOverlappingCircle();
+//   if (overlappingCircle) {
+//     circleFilling = false; // stop filling if circles collide
+//     circles.splice(circles.indexOf(overlappingCircle), 1); // remove active circle and touched one
+//     end = true;
+//   }
+
+// function getOverlappingCircle() {
+//   for (const c of circles)
+//     if (dist(c.x, c.y, mouseX, mouseY) < circleSize * 0.5 + c.size * 0.5 + 2)
+//       return c;
+
+//   return undefined;
+// }
+
+// function onEnd() {
+//   if (circleFilling && !end) {
+//     circles.push(new Circle(mouseX, mouseY, circleSize, circleColor)); // if not touched, add to an array
+//   }
+//   circleFilling = false; // stop filling the circle
+
+//   calcArea(); // calculate coloured area
+//   return false;
+// }
+
+function calcArea() {
+  totalArea = 0;
+  for (const c of circles) {
+    circleArea = (c.size * 0.5) ** 2 * Math.PI; // area of a every circle r2*pi
+    totalArea += circleArea;
+  }
+
+  perct = ((totalArea / totalPixl) * 100).toFixed(2);
+}
+
+class Circle {
+  constructor(x, y, size, color) {
+    this.x = x;
+    this.y = y;
+    this.size = size;
+    this.color = color;
+  }
+
+  draw() {
+    ctx.fill(this.color);
+    ctx.arc(this.x, this.y, this.size, 0, 2 * Math.PI);
+    //ellipse(this.x, this.y, this.size, this.size);
+    //if (end) this.color.setAlpha(128 + 128 * sin(millis() / 500));
+  }
+}
+////////////////////////////////////////////////
+////////////////////////////////////////////////
