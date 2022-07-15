@@ -3,9 +3,9 @@ const ctx = canvas.getContext('2d');
 const pi2 = Math.PI * 2;
 const circles = [];
 let circleSize = 0;
-let newBall = 0;
+let radiusy = 0;
 let raf;
-var buttonDown = false;
+let buttonDown = false;
 // prettier-ignore
 let resize = () => {ctx.canvas.width = window.innerWidth - 40;ctx.canvas.height = window.innerHeight - 40;};
 let getDistance = (x1, y1, x2, y2) => Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2); // Distance formula
@@ -13,26 +13,27 @@ let randomColor = () => '#' + Math.floor(Math.random() * 16777215).toString(16);
 
 let pts = { x: 0, y: 0 }; // updates on buttonDown
 
-let ball = {
-  x: 0,
-  y: 0,
-  radius: 0,
-  color: 'blue',
-  drawBall: function () {
+// let ball = {
+//   x: 0,
+//   y: 0,
+//   radius: radiusy,
+//   color: 'blue',
+
+// };
+
+class Ball {
+  constructor(x, y, radius, color) {
+    this.x = x;
+    this.y = y;
+    this.radius = radius;
+    this.color = color;
+  }
+  draw() {
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.radius, 0, pi2, false);
     ctx.closePath();
     ctx.fillStyle = this.color;
     ctx.fill();
-  },
-};
-
-class Circle {
-  constructor(x, y, size, color) {
-    this.x = x;
-    this.y = y;
-    this.size = size;
-    this.color = color;
   }
 }
 
@@ -42,46 +43,53 @@ function clear() {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
+let bally;
+
 function draw() {
   if (!buttonDown) {
-    ball.x = pts.x;
-    ball.y = pts.y;
-    ball.color = randomColor();
+    bally.color = randomColor();
   }
-
-  ball.drawBall();
-  ball.radius += 5;
-  newBall = ball.radius;
-  raf = window.requestAnimationFrame(draw);
+  bally.x = pts.x;
+  bally.y = pts.y;
+  radiusy += 5;
+  bally.draw();
   buttonDown = true;
+  bally.radius = radiusy;
+  raf = window.requestAnimationFrame(draw);
 }
 
 var handleTap = function (e) {
   pointerAdjust(e); // adjust pointer to device mouse||touch
-  ball.radius = 0; // reset radius before next draw
+
   addCircle();
+
+  //window.cancelAnimationFrame(raf);
+
   //showScoreText(); // display current score results in front of circles
 };
 
 function addCircle() {
   let circle;
-  console.log(newBall);
+
+  bally = new Ball();
+  //console.log(circle);
+  bally.radius = 0; // reset radius before next draw
   draw(); // execute drawBall and push to array
 
   // go trough all circles in array
   for (var i = 0; i < circles.length; i++) {
     circle = circles[i];
-    let distance = getDistance(circle.x, circle.y, pts.x, pts.y);
+    //let distance = getDistance(circle.x, circle.y, pts.x, pts.y);
 
     //const overlappingCircle = getOverlappingCircle(circle);
     //if (overlappingCircle) circles.splice(circles.indexOf(overlappingCircle), 1);
 
     // // if distance is less than radius times two, then we know its a collision
-    if (distance < circle.radius * 2) circles.splice(circles[i], 1); // Remove the element from array
+    // if (distance < circle.radius * 2) circles.splice(circles[i], 1); // Remove the element from array
   }
-  circles.push(new Circle(ball.x, ball.y, newBall.radius, ball.color));
+  circles.push(bally.x, bally.y, bally.radius, bally.color);
 
-  //console.log(circle);
+  console.log(circles);
 
   // draw based on what circles we have in the array
   //drawCircles(); // draw balls
@@ -149,7 +157,7 @@ var tapMove = function (e) {
   if (buttonDown) {
     e.preventDefault();
     //clear();
-    // ball.x = pts.x;
+    // Ball.x = pts.x;
     // ball.y = pts.y;
     // ball.draw();
     window.cancelAnimationFrame(raf);
