@@ -1,30 +1,40 @@
 const canvas = document.getElementById('can');
 const ctx = canvas.getContext('2d');
-var circles = [];
-let end = true;
+const pi2 = Math.PI * 2;
+const circles = [];
+let circleSize = 0;
+let newBall = 0;
 let raf;
 var buttonDown = false;
-let resize = () => {
-  ctx.canvas.width = window.innerWidth - 40;
-  ctx.canvas.height = window.innerHeight - 40;
-};
+// prettier-ignore
+let resize = () => {ctx.canvas.width = window.innerWidth - 40;ctx.canvas.height = window.innerHeight - 40;};
 let getDistance = (x1, y1, x2, y2) => Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2); // Distance formula
 let randomColor = () => '#' + Math.floor(Math.random() * 16777215).toString(16);
 
-let pts = { x: 0, y: 0 };
-var ball = {
-  x: pts.x,
-  y: pts.y,
+let pts = { x: 0, y: 0 }; // updates on buttonDown
+
+let ball = {
+  x: 0,
+  y: 0,
   radius: 0,
   color: 'blue',
-  draw: function () {
+  drawBall: function () {
     ctx.beginPath();
-    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+    ctx.arc(this.x, this.y, this.radius, 0, pi2, false);
     ctx.closePath();
     ctx.fillStyle = this.color;
     ctx.fill();
   },
 };
+
+class Circle {
+  constructor(x, y, size, color) {
+    this.x = x;
+    this.y = y;
+    this.size = size;
+    this.color = color;
+  }
+}
 
 function clear() {
   resize();
@@ -33,47 +43,77 @@ function clear() {
 }
 
 function draw() {
-  ball.radius += 10;
   if (!buttonDown) {
-    ball.color = randomColor();
     ball.x = pts.x;
     ball.y = pts.y;
-
-    buttonDown = true;
+    ball.color = randomColor();
   }
-  ball.draw();
+
+  ball.drawBall();
+  ball.radius += 5;
+  newBall = ball.radius;
   raf = window.requestAnimationFrame(draw);
+  buttonDown = true;
 }
 
 var handleTap = function (e) {
   pointerAdjust(e); // adjust pointer to device mouse||touch
   ball.radius = 0; // reset radius before next draw
-  draw(); // draw balls
-
-  addCircle(e);
-  //circles.push(ball);
-
-  //console.log(circles);
-
+  addCircle();
   //showScoreText(); // display current score results in front of circles
 };
 
-function addCircle(e) {
-  // check if there is any intersection with existing circles
-  for (var i = circles.length - 1; i > 0; i--) {
-    var circle = circles[i],
-      distance = getDistance(e.x, e.y, ball.x, ball.y);
+function addCircle() {
+  let circle;
+  console.log(newBall);
+  draw(); // execute drawBall and push to array
+
+  // go trough all circles in array
+  for (var i = 0; i < circles.length; i++) {
+    circle = circles[i];
+    let distance = getDistance(circle.x, circle.y, pts.x, pts.y);
+
+    //const overlappingCircle = getOverlappingCircle(circle);
+    //if (overlappingCircle) circles.splice(circles.indexOf(overlappingCircle), 1);
 
     // // if distance is less than radius times two, then we know its a collision
-    if (distance < circle.radius * 2) {
-      circles.splice(i, 1); // Remove the element from array
-      //return;
-    }
-    // push the new circle in the array
-    // prettier-ignore
-    circles.push(circle.x, circle.y, circle.radius, circle.color);
+    if (distance < circle.radius * 2) circles.splice(circles[i], 1); // Remove the element from array
   }
-  console.log(circles);
+  circles.push(new Circle(ball.x, ball.y, newBall.radius, ball.color));
+
+  //console.log(circle);
+
+  // draw based on what circles we have in the array
+  //drawCircles(); // draw balls
+}
+
+function drawCircles() {
+  // We'll have to clear the canvas as it has deleted circles as well
+  //ctx.clearRect(0, 0, canvas.width, canvas.height);
+  clear();
+
+  for (var i = circles.length - 1; i > 0; i--) {
+    var circle = circles[i];
+
+    ctx.fillStyle = circle.color;
+    ctx.beginPath();
+
+    ctx.arc(circle.x, circle.y, circle.radius, 0, pi2);
+
+    ctx.fill();
+  }
+}
+
+function getOverlappingCircle(circle) {
+  let dist;
+  for (const c of circles) {
+    dist = getDistance(c.x, c.y, circle.x, circle.y);
+    if (dist < circle.size * 0.5 + c.size * 0.5 + 2) {
+      return c;
+    }
+  }
+
+  return undefined;
 }
 
 /**
@@ -108,7 +148,12 @@ var tapStart = function (e) {
 var tapMove = function (e) {
   if (buttonDown) {
     e.preventDefault();
-    ball.draw();
+    //clear();
+    // ball.x = pts.x;
+    // ball.y = pts.y;
+    // ball.draw();
+    window.cancelAnimationFrame(raf);
+    buttonDown = false;
   }
 };
 
@@ -129,12 +174,3 @@ canvas.addEventListener('mousemove', tapMove, false);
 canvas.addEventListener('mouseup', tapEnd, false);
 
 canvas.addEventListener('load', clear());
-
-class Circle {
-  constructor(x, y, size, color) {
-    this.x = x;
-    this.y = y;
-    this.size = size;
-    this.color = color;
-  }
-}
