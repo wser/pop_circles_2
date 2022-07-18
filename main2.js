@@ -3,8 +3,10 @@ const ctx = canvas.getContext('2d');
 const pi2 = Math.PI * 2;
 const circles = [];
 let circleSize = 0;
-let radiusy = 0;
 let raf;
+let circle;
+let bally;
+
 let buttonDown = false;
 // prettier-ignore
 let resize = () => {ctx.canvas.width = window.innerWidth - 40;ctx.canvas.height = window.innerHeight - 40;};
@@ -43,24 +45,23 @@ function clear() {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
-let bally;
-
 function draw() {
   if (!buttonDown) {
+    bally.radius = 0; // reset radius before next draw
     bally.color = randomColor();
   }
   bally.x = pts.x;
   bally.y = pts.y;
-  radiusy += 5;
+
   bally.draw();
   buttonDown = true;
-  bally.radius = radiusy;
+  bally.radius += 5;
   raf = window.requestAnimationFrame(draw);
 }
 
 var handleTap = function (e) {
   pointerAdjust(e); // adjust pointer to device mouse||touch
-
+  bally = new Ball();
   addCircle();
 
   //window.cancelAnimationFrame(raf);
@@ -69,25 +70,21 @@ var handleTap = function (e) {
 };
 
 function addCircle() {
-  let circle;
-
-  bally = new Ball();
   //console.log(circle);
-  bally.radius = 0; // reset radius before next draw
-  draw(); // execute drawBall and push to array
 
+  draw(); // execute drawBall and push to array
   // go trough all circles in array
   for (var i = 0; i < circles.length; i++) {
     circle = circles[i];
-    //let distance = getDistance(circle.x, circle.y, pts.x, pts.y);
+    //let distance = getDistance(circle.x, circle.y, bally.x, bally.y);
 
-    //const overlappingCircle = getOverlappingCircle(circle);
-    //if (overlappingCircle) circles.splice(circles.indexOf(overlappingCircle), 1);
+    const overlappingCircle = getOverlappingCircle(circle);
+    if (overlappingCircle) circles.splice(circles.indexOf(overlappingCircle), 1);
 
     // // if distance is less than radius times two, then we know its a collision
-    // if (distance < circle.radius * 2) circles.splice(circles[i], 1); // Remove the element from array
+    //if (distance < circle.radius * 2) circles.splice(circles[i], 1); // Remove the element from array
   }
-  circles.push(bally.x, bally.y, bally.radius, bally.color);
+  circles.push(bally);
 
   console.log(circles);
 
